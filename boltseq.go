@@ -4,7 +4,7 @@ import (
 	"encoding/binary"
 	"errors"
 
-	"github.com/boltdb/bolt"
+	bolt "github.com/etcd-io/bbolt"
 )
 
 var (

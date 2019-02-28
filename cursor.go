@@ -3,7 +3,7 @@ package boltseq
 import (
 	"bytes"
 
-	"github.com/boltdb/bolt"
+	bolt "github.com/etcd-io/bbolt"
 )
 
 type pointer struct {
