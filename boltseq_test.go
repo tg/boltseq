@@ -63,9 +63,12 @@ func TestBucket_put(t *testing.T) {
 	err = db.Update(func(tx *bolt.Tx) error {
 		b := NewBucket(tx.Bucket(testBucketName))
 
-		err := b.Put([]byte("x"), []byte("v"))
+		seq, err := b.Put([]byte("x"), []byte("v"))
 		if err != nil {
 			t.Fatal(err)
+		}
+		if seq != 1 {
+			t.Fatal(seq)
 		}
 
 		v := b.Get([]byte("x"))
@@ -104,9 +107,12 @@ func TestBucket_putMany(t *testing.T) {
 		b := NewBucket(tx.Bucket(testBucketName))
 
 		for n, key := range keys {
-			err := b.Put([]byte(key), []byte(fmt.Sprint(n+1)))
+			seq, err := b.Put([]byte(key), []byte(fmt.Sprint(n+1)))
 			if err != nil {
 				t.Fatal(err)
+			}
+			if seq != uint64(n+1) {
+				t.Fatal(seq, n)
 			}
 		}
 

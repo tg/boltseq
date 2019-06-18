@@ -75,36 +75,36 @@ var (
 	ErrInvalidKey    = errors.New("invalid key")
 )
 
-// Put adds key-value pair into the bucket.
+// Put adds key-value pair into the bucket. Returns sequence number and error, if any.
 // The key is always given a new sequence number, even if it already exists.
-func (b *Bucket) Put(key []byte, value []byte) error {
+func (b *Bucket) Put(key []byte, value []byte) (uint64, error) {
 	bd, err := b.loc.CreateBucketIfNotExists(bucketNameData)
 	if err != nil {
-		return err
+		return 0, err
 	}
 
 	bs, err := b.loc.CreateBucketIfNotExists(bucketNameSeq)
 	if err != nil {
-		return err
+		return 0, err
 	}
 
 	// Delete current value
 	if v := Value(bd.Get(key)); v != nil {
 		if !v.IsValid() {
-			return ErrInvalidValue
+			return 0, ErrInvalidValue
 		}
 		if err := bs.Delete(v.seqBytes()); err != nil {
-			return err
+			return 0, err
 		}
 		if err := bd.Delete(key); err != nil {
-			return err
+			return 0, err
 		}
 	}
 
 	// Get next sequence
 	seq, err := bs.NextSequence()
 	if err != nil {
-		return err
+		return seq, err
 	}
 
 	// Make value
@@ -114,10 +114,10 @@ func (b *Bucket) Put(key []byte, value []byte) error {
 	// we add keys in order.
 	bs.FillPercent = 1
 	if err := bs.Put(val.seqBytes(), key); err != nil {
-		return err
+		return seq, err
 	}
 
-	return bd.Put(key, val)
+	return seq, bd.Put(key, val)
 }
 
 // Get returns Value for the key
