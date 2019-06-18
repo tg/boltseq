@@ -37,6 +37,7 @@ func (p *pointer) Delete(k []byte) error {
 	return p.c.Delete()
 }
 
+// Cursors allows for iterating buckets according to sequence number.
 type Cursor struct {
 	cs *bolt.Cursor
 	dp pointer
@@ -63,6 +64,8 @@ func (c *Cursor) sync(seq []byte, key []byte) bool {
 	return true
 }
 
+// First moves cursor to the first key/value pair.
+// Returns false on empty bucket, true otherwise.
 func (c *Cursor) First() bool {
 	if c.cs == nil {
 		return false
@@ -71,6 +74,8 @@ func (c *Cursor) First() bool {
 	return c.sync(c.cs.First())
 }
 
+// Last moves cursor to the last key/value pair.
+// Returns false on empty bucket, true otherwise.
 func (c *Cursor) Last() bool {
 	if c.cs == nil {
 		return false
@@ -79,6 +84,8 @@ func (c *Cursor) Last() bool {
 	return c.sync(c.cs.Last())
 }
 
+// Next moves cursor to the next key/value pair.
+// Returns false is reached end of the bucket, true otherwise.
 func (c *Cursor) Next() bool {
 	if c.cs == nil {
 		return false
@@ -87,6 +94,8 @@ func (c *Cursor) Next() bool {
 	return c.sync(c.cs.Next())
 }
 
+// Prev moves cursor to the previous key/value pair.
+// Returns false is reached end of the bucket, true otherwise.
 func (c *Cursor) Prev() bool {
 	if c.cs == nil {
 		return false
@@ -95,6 +104,9 @@ func (c *Cursor) Prev() bool {
 	return c.sync(c.cs.Prev())
 }
 
+// Seek moves cursor to the key/value pair at the given seq number.
+// If seq number doesn't exists it points to the next item, if any.
+// Returns false if no item, true otherwise.
 func (c *Cursor) Seek(seq uint64) bool {
 	if c.cs == nil {
 		return false
@@ -103,18 +115,22 @@ func (c *Cursor) Seek(seq uint64) bool {
 	return c.sync(c.cs.Seek((newValue(seq, nil).seqBytes())))
 }
 
+// Err returns error, if any.
 func (c *Cursor) Err() error {
 	return c.err
 }
 
+// Seq returns current sequence number.
 func (c *Cursor) Seq() uint64 {
 	return c.seq
 }
 
+// Key returns current key.
 func (c *Cursor) Key() []byte {
 	return c.key
 }
 
+// Data returns current data for the key.
 func (c *Cursor) Data() ([]byte, error) {
 	v, ok := c.dp.Get(c.key)
 	if !ok {
@@ -129,6 +145,7 @@ func (c *Cursor) Data() ([]byte, error) {
 	return val.Data(), nil
 }
 
+// Delete deletes the current item.
 func (c *Cursor) Delete() error {
 	err := c.dp.Delete(c.key)
 	if err != nil {
