@@ -7,7 +7,7 @@ import (
 	"encoding/binary"
 	"errors"
 
-	bolt "github.com/etcd-io/bbolt"
+	bolt "go.etcd.io/bbolt"
 )
 
 // sub-bucket names

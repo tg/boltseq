@@ -7,7 +7,7 @@ import (
 	"os"
 	"testing"
 
-	bolt "github.com/etcd-io/bbolt"
+	bolt "go.etcd.io/bbolt"
 )
 
 var testBucketName = []byte("test")
